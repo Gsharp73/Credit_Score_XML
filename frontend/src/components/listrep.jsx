@@ -9,7 +9,7 @@ const ReportList = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:3000/reports")
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/reports`)
       .then((res) => res.json())
       .then((data) => {
         setReports(data);

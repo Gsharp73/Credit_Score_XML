@@ -8,7 +8,7 @@ const ReportDetail = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`http://localhost:3000/reports/${id}`)
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/reports/${id}`)
       .then((res) => res.json())
       .then((data) => {
         setReport(data);

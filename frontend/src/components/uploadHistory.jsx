@@ -5,7 +5,7 @@ const UploadHistory = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:3000/history")
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/history`)
       .then((res) => res.json())
       .then((data) => {
         setHistory(data);

@@ -1,7 +1,5 @@
 const express = require("express");
 const xml2js = require("xml2js");
-const fs = require("fs");
-const path = require("path");
 const Report = require("../models/Report");
 const UploadHistory = require("../models/history");
 
@@ -13,61 +11,48 @@ router.post("/", async (req, res) => {
   }
 
   const xmlFile = req.files.xmlFile;
-  const timestamp = Date.now();
-  const newFileName = `${timestamp}_${xmlFile.name}`;
-  const filePath = path.join(__dirname, "../uploads", newFileName);
+  
+  // Read file buffer directly
+  const fileBuffer = xmlFile.data;
 
-  xmlFile.mv(filePath, async (err) => {
+  xml2js.parseString(fileBuffer, { explicitArray: false }, async (err, result) => {
     if (err) {
-      return res.status(500).json({ message: "File upload failed." });
+      return res.status(500).json({ message: "Error parsing XML." });
     }
 
-    fs.readFile(filePath, "utf-8", (err, data) => {
-      if (err) {
-        return res.status(500).json({ message: "Error reading file." });
+    const parsedData = extractData(result);
+    // console.log("Extracted PAN:", parsedData.pan);
+
+    if (parsedData.pan === "N/A") {
+      return res.status(400).json({ message: "PAN not found in XML. Upload rejected." });
+    }
+
+    try {
+      let existingReport = await Report.findOne({ pan: parsedData.pan });
+      let message;
+
+      if (existingReport) {
+        existingReport.set(parsedData);
+        await existingReport.save();
+        message = "Existing report updated successfully.";
+      } else {
+        const report = new Report(parsedData);
+        await report.save();
+        message = "New report created successfully.";
       }
 
-      xml2js.parseString(data, { explicitArray: false }, async (err, result) => {
-        if (err) {
-          return res.status(500).json({ message: "Error parsing XML." });
-        }
-
-        const parsedData = extractData(result);
-        console.log("Extracted PAN:", parsedData.pan);
-
-        if (parsedData.pan === "N/A") {
-          return res.status(400).json({ message: "PAN not found in XML. Upload rejected." });
-        }
-
-        try {
-          let existingReport = await Report.findOne({ pan: parsedData.pan });
-          let message;
-
-          if (existingReport) {
-            existingReport.set(parsedData);
-            await existingReport.save();
-            message = "Existing report updated successfully.";
-          } else {
-            const report = new Report(parsedData);
-            await report.save();
-            message = "New report created successfully.";
-          }
-
-          // Store upload history
-          const uploadRecord = new UploadHistory({
-            pan: parsedData.pan,
-            fileName: newFileName,
-            uploadTime: new Date(),
-          });
-          await uploadRecord.save();
-
-          console.log(`File uploaded: ${newFileName}, PAN: ${parsedData.pan}`);
-          return res.status(200).json({ message, report: parsedData });
-        } catch (err) {
-          return res.status(500).json({ message: "Error saving to database." });
-        }
+      const uploadRecord = new UploadHistory({
+        pan: parsedData.pan,
+        fileName: xmlFile.name,  // You can use the original file name here
+        uploadTime: new Date(),
       });
-    });
+      await uploadRecord.save();
+
+      console.log(`File uploaded: ${xmlFile.name}, PAN: ${parsedData.pan}`);
+      return res.status(200).json({ message, report: parsedData });
+    } catch (err) {
+      return res.status(500).json({ message: "Error saving to database." });
+    }
   });
 });
 

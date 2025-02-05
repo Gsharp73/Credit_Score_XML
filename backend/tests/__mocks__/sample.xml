@@ -1,0 +1,9 @@
+<INProfileResponse>
+  <CAIS_Account>
+    <CAIS_Account_DETAILS>
+      <CAIS_Holder_ID_Details>
+        <Income_TAX_PAN>ABCDE1234F</Income_TAX_PAN>
+      </CAIS_Holder_ID_Details>
+    </CAIS_Account_DETAILS>
+  </CAIS_Account>
+</INProfileResponse>

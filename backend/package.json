@@ -11,5 +11,11 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
+  }, 
+  "scripts": {
+    "test": "jest --forceExit"
+  },
+  "jest": {
+    "setupFilesAfterEnv": ["./tests/setup.js"]
   }
 }

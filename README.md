@@ -1,4 +1,4 @@
-# XML Parser Application
+# Fin_Parser
 
 ## Setup and Run Instructions
 
@@ -9,8 +9,8 @@
 ### Installation
 1. Clone the repository:
    ```sh
-   git clone https://github.com/Gsharp73/Credit_Score_XML.git
-   cd Credit_Score_XML
+   git clone https://github.com/Gsharp73/Fin_Parser.git
+   cd Fin_Parser
    ```
 2. Install dependencies:
    ```sh
